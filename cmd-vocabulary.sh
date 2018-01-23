@@ -12,21 +12,31 @@ RESTORE='\033[0m'
 DIR="$(dirname "$(readlink -f "$0")")"
 LAST_LINE_CACHE_FILE=$DIR/.cmd-vocabulary-last-line
 
+# HELPER
+getVocabName() {
+    IFS=':' read -ra ARRAY <<< "$1"
+    echo ${ARRAY[0]}
+}
+
 # READ CASE
 # ---------------
 printVocabulary() {
     LINE=`shuf -n1 $VOCAB_FILE`
+
+    # save last line
     echo "$LINE" > $LAST_LINE_CACHE_FILE
 
-    # split word and translation
     IFS=':' read -ra ARRAY <<< "$LINE"
-    STR="${LPURPLE}${ARRAY[0]}:${RESTORE}"
-
     IFS=';' read -ra ARRAY2 <<< "${ARRAY[1]}"
 
-    STR="$STR${YELLOW}${ARRAY2[0]}${RESTORE}"
+    VOCAB=$(getVocabName $LINE)
+    TRANSLATION=${ARRAY2[0]}
+
+    STR="${LPURPLE}${VOCAB}:${RESTORE}"
+    STR="$STR${YELLOW}${TRANSLATION}${RESTORE}"
+
     for entry in "${ARRAY2[@]:1}"; do
-         STR="$STR ${NL} $entry"
+         STR="$STR ${NL} * $entry"
     done
 
     if [ -z ${ARRAY2[1]+x} ];
@@ -37,7 +47,7 @@ printVocabulary() {
     #    echo ${LINE_NUMBER}
     fi
 
-    echo -e "${STR}"
+    echo -e "$STR" | awk '$1=$1'
 }
 
 ## ENTRY POINT
@@ -57,10 +67,17 @@ fi
 if [ -z ${UPDATE+x} ]; then
     printVocabulary
 else
-    echo 'XXXXXXXXXXXXXXXXXXXXX!'
-    echo $UPDATE
-    echo $VOCAB_FILE
-    #cat $LAST_LINE_CACHE_FILE
-    echo 'XXXXXXXXXXXXXXXXXXXXX!'
+    LAST_LINE_TEXT=$(cat $LAST_LINE_CACHE_FILE)
+    NEW_TEXT="$LAST_LINE_TEXT;$UPDATE"
+    VOCAB=$(getVocabName $LAST_LINE_TEXT)
+
+    sed -i "s/$LAST_LINE_TEXT/$NEW_TEXT/g" $VOCAB_FILE
+
+#    read -p " $VOCAB => Add \"$UPDATE\"? " -n 1 -r
+#    echo
+#    if [[ $REPLY =~ ^[Yy]$ ]]
+#    then
+#        sed -i "s/$LAST_LINE_TEXT/$NEW_TEXT/g" $VOCAB_FILE
+#    fi
 fi
 
