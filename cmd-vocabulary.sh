@@ -9,7 +9,8 @@ LPURPLE='\033[01;35m'
 YELLOW='\033[00;33m'
 RESTORE='\033[0m'
 
-FILE=${1:-`dirname $0`/default-vocabulary.yml}
+DIR="$(dirname "$(readlink -f "$0")")"
+FILE=${1:-$DIR/default-vocabulary.yml}
 
 # READ CASE
 # ---------------
@@ -37,7 +38,6 @@ printVocabulary() {
 
     echo -e "${STR}"
 }
-
 
 ## ENTRY POINT
 UPDATE=false
