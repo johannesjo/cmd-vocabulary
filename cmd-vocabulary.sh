@@ -10,12 +10,13 @@ YELLOW='\033[00;33m'
 RESTORE='\033[0m'
 
 DIR="$(dirname "$(readlink -f "$0")")"
-FILE=${1:-$DIR/default-vocabulary.yml}
+LAST_LINE_CACHE_FILE=$DIR/.cmd-vocabulary-last-line
 
 # READ CASE
 # ---------------
 printVocabulary() {
-    LINE=`shuf -n1 $FILE`
+    LINE=`shuf -n1 $VOCAB_FILE`
+    echo "$LINE" > $LAST_LINE_CACHE_FILE
 
     # split word and translation
     IFS=':' read -ra ARRAY <<< "$LINE"
@@ -32,7 +33,7 @@ printVocabulary() {
       then
         STR="$STR"
     #    STR="$STR ${NL} ––– Add your own sentence! –––"
-    #    LINE_NUMBER=$(grep -Fn "${LINE}" ${FILE})
+    #    LINE_NUMBER=$(grep -Fn "${LINE}" ${VOCAB_FILE})
     #    echo ${LINE_NUMBER}
     fi
 
@@ -40,18 +41,26 @@ printVocabulary() {
 }
 
 ## ENTRY POINT
-UPDATE=false
-while getopts u option
+while getopts u:f: option
 do
  case "${option}"
  in
- u) UPDATE=true;;
+ u) UPDATE=$OPTARG;;
+ f) VOCAB_FILE=$OPTARG;;
  esac
 done
 
-if $UPDATE ; then
-    echo 'Be careful not to fall off!'
-else
+if [ -z ${VOCAB_FILE+x} ]; then
+    VOCAB_FILE=$DIR/default-vocabulary.yml
+fi
+
+if [ -z ${UPDATE+x} ]; then
     printVocabulary
+else
+    echo 'XXXXXXXXXXXXXXXXXXXXX!'
+    echo $UPDATE
+    echo $VOCAB_FILE
+    #cat $LAST_LINE_CACHE_FILE
+    echo 'XXXXXXXXXXXXXXXXXXXXX!'
 fi
 

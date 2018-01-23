@@ -4,7 +4,7 @@ Command line word of the day
 ## Usage
 ```
 chmod +x cmd-vocabulary.sh
-./cmd-vocabulary.sh your-vocabulary.txt
+./cmd-vocabulary.sh -f your-vocabulary.txt
 ```
 
 ## Vocabulary file
