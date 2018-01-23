@@ -9,22 +9,49 @@ LPURPLE='\033[01;35m'
 YELLOW='\033[00;33m'
 RESTORE='\033[0m'
 
-
 FILE=${1:-`dirname $0`/default-vocabulary.yml}
-LINE=`shuf -n1 $FILE`
 
-# split word and translation
-IFS=':' read -ra ARRAY <<< "$LINE"
-STR="${LPURPLE}${ARRAY[0]}:${RESTORE}"
+# READ CASE
+# ---------------
+printVocabulary() {
+    LINE=`shuf -n1 $FILE`
 
-IFS=';' read -ra ARRAY2 <<< "${ARRAY[1]}"
+    # split word and translation
+    IFS=':' read -ra ARRAY <<< "$LINE"
+    STR="${LPURPLE}${ARRAY[0]}:${RESTORE}"
 
-STR="$STR${YELLOW}${ARRAY2[0]}${RESTORE}"
-for entry in "${ARRAY2[@]:1}"; do
-     STR="$STR ${NL} $entry"
+    IFS=';' read -ra ARRAY2 <<< "${ARRAY[1]}"
+
+    STR="$STR${YELLOW}${ARRAY2[0]}${RESTORE}"
+    for entry in "${ARRAY2[@]:1}"; do
+         STR="$STR ${NL} $entry"
+    done
+
+    if [ -z ${ARRAY2[1]+x} ];
+      then
+        STR="$STR"
+    #    STR="$STR ${NL} ––– Add your own sentence! –––"
+    #    LINE_NUMBER=$(grep -Fn "${LINE}" ${FILE})
+    #    echo ${LINE_NUMBER}
+    fi
+
+    echo -e "${STR}"
+}
+
+
+## ENTRY POINT
+UPDATE=false
+while getopts u option
+do
+ case "${option}"
+ in
+ u) UPDATE=true;;
+ esac
 done
 
+if $UPDATE ; then
+    echo 'Be careful not to fall off!'
+else
+    printVocabulary
+fi
 
-
-
-echo -e "${STR}"
